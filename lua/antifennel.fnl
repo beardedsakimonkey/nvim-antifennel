@@ -10,7 +10,7 @@
   (local path (.. dirname (.. :vendor sep :antifennel)))
   path)
 
-(fn run-antifennel [filename _start-line _end-line]
+(fn run-antifennel [filename]
   (local cmd (.. (antifennel-script) " " filename))
   (local lines [])
   (with-open [fh (io.popen cmd)]
@@ -34,7 +34,7 @@
         input (vim.api.nvim_buf_get_lines 0 start-line end-line true)
         filename (vim.fn.tempname)]
     (create-file filename (table.concat input "\n"))
-    (local lines (run-antifennel filename start-line end-line))
+    (local lines (run-antifennel filename))
     (replace-lines start-line end-line lines)
     (os.remove filename)))
 

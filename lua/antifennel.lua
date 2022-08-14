@@ -11,7 +11,7 @@ local function antifennel_script()
   local path = (dirname .. ("vendor" .. sep .. "antifennel"))
   return path
 end
-local function run_antifennel(filename, _start_line, _end_line)
+local function run_antifennel(filename)
   local cmd = (antifennel_script() .. " " .. filename)
   local lines = {}
   do
@@ -47,7 +47,7 @@ local function run(start_line, end_line)
   local input = vim.api.nvim_buf_get_lines(0, start_line0, end_line, true)
   local filename = vim.fn.tempname()
   create_file(filename, table.concat(input, "\n"))
-  local lines = run_antifennel(filename, start_line0, end_line)
+  local lines = run_antifennel(filename)
   replace_lines(start_line0, end_line, lines)
   return os.remove(filename)
 end
