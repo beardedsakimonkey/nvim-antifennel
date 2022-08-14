@@ -11,33 +11,6 @@ local function antifennel_script()
   local path = (dirname .. ("vendor" .. sep .. "antifennel"))
   return path
 end
-local function run_antifennel(filename)
-  local cmd = (antifennel_script() .. " " .. filename)
-  local lines = {}
-  do
-    local fh = io.popen(cmd)
-    local function close_handlers_8_auto(ok_9_auto, ...)
-      fh:close()
-      if ok_9_auto then
-        return ...
-      else
-        return error(..., 0)
-      end
-    end
-    local function _3_()
-      for line in fh:lines() do
-        table.insert(lines, line)
-      end
-      return nil
-    end
-    close_handlers_8_auto(_G.xpcall(_3_, (package.loaded.fennel or debug).traceback))
-  end
-  if ("" == lines[#lines]) then
-    table.remove(lines)
-  else
-  end
-  return lines
-end
 local function replace_lines(start_line, end_line, lines)
   vim.api.nvim_buf_set_lines(0, start_line, end_line, true, {})
   return vim.api.nvim_buf_set_lines(0, start_line, start_line, true, lines)
@@ -47,8 +20,17 @@ local function run(start_line, end_line)
   local input = vim.api.nvim_buf_get_lines(0, start_line0, end_line, true)
   local filename = vim.fn.tempname()
   create_file(filename, table.concat(input, "\n"))
-  local lines = run_antifennel(filename)
-  replace_lines(start_line0, end_line, lines)
+  local lines = vim.fn.systemlist((antifennel_script() .. " " .. filename))
+  local has_err = (0 ~= vim.v.shell_error)
+  if has_err then
+    vim.api.nvim_err_writeln(("[nvim-antifennel] " .. table.concat(lines, "\n")))
+  else
+    if ("" == lines[#lines]) then
+      table.remove(lines)
+    else
+    end
+    replace_lines(start_line0, end_line, lines)
+  end
   return os.remove(filename)
 end
 return {run = run}

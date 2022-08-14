@@ -10,17 +10,6 @@
   (local path (.. dirname (.. :vendor sep :antifennel)))
   path)
 
-(fn run-antifennel [filename]
-  (local cmd (.. (antifennel-script) " " filename))
-  (local lines [])
-  (with-open [fh (io.popen cmd)]
-    (each [line (fh:lines)]
-      (table.insert lines line)))
-  ;; Remove last line if it's empty
-  (when (= "" (. lines (length lines)))
-    (table.remove lines))
-  lines)
-
 (fn replace-lines [start-line end-line lines]
   ;; Delete existing lines
   (vim.api.nvim_buf_set_lines 0 start-line end-line true [])
@@ -34,8 +23,18 @@
         input (vim.api.nvim_buf_get_lines 0 start-line end-line true)
         filename (vim.fn.tempname)]
     (create-file filename (table.concat input "\n"))
-    (local lines (run-antifennel filename))
-    (replace-lines start-line end-line lines)
+    ;; NOTE: Not using `io.popen` as it seems to pipe its stderr into nvim's
+    ;; stderr, messing up the nvim TUI.
+    (local lines (vim.fn.systemlist (.. (antifennel-script) " " filename)))
+    (local has-err (not= 0 vim.v.shell_error))
+    (if has-err
+        (vim.api.nvim_err_writeln (.. "[nvim-antifennel] "
+                                      (table.concat lines "\n")))
+        (do
+          ;; Remove last line if it's empty
+          (when (= "" (. lines (length lines)))
+            (table.remove lines))
+          (replace-lines start-line end-line lines)))
     (os.remove filename)))
 
 {: run}
