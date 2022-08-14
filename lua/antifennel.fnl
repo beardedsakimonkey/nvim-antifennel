@@ -12,7 +12,7 @@
 
 (fn run-antifennel [filename _start-line _end-line]
   (local cmd (.. (antifennel-script) " " filename))
-  (local lines {})
+  (local lines [])
   (with-open [fh (io.popen cmd)]
     (each [line (fh:lines)]
       (table.insert lines line)))
