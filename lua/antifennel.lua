@@ -13,12 +13,25 @@ local function antifennel_script()
 end
 local function run_antifennel(filename, _start_line, _end_line)
   local cmd = (antifennel_script() .. " " .. filename)
-  local fh = io.popen(cmd)
   local lines = {}
-  for line in fh:lines() do
-    table.insert(lines, line)
+  do
+    local fh = io.popen(cmd)
+    local function close_handlers_8_auto(ok_9_auto, ...)
+      fh:close()
+      if ok_9_auto then
+        return ...
+      else
+        return error(..., 0)
+      end
+    end
+    local function _3_()
+      for line in fh:lines() do
+        table.insert(lines, line)
+      end
+      return nil
+    end
+    close_handlers_8_auto(_G.xpcall(_3_, (package.loaded.fennel or debug).traceback))
   end
-  fh:close()
   if ("" == lines[#lines]) then
     table.remove(lines)
   else

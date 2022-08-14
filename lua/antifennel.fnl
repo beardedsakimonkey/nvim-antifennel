@@ -12,11 +12,10 @@
 
 (fn run-antifennel [filename _start-line _end-line]
   (local cmd (.. (antifennel-script) " " filename))
-  (local fh (io.popen cmd))
   (local lines {})
-  (each [line (fh:lines)]
-    (table.insert lines line))
-  (fh:close)
+  (with-open [fh (io.popen cmd)]
+    (each [line (fh:lines)]
+      (table.insert lines line)))
   ;; Remove last line if it's empty
   (when (= "" (. lines (length lines)))
     (table.remove lines))
