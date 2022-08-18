@@ -11,6 +11,9 @@
   path)
 
 (fn replace-lines [start-line end-line lines]
+  ;; Remove last line if it's empty
+  (when (= "" (. lines (length lines)))
+    (table.remove lines))
   ;; Delete existing lines
   (vim.api.nvim_buf_set_lines 0 start-line end-line true [])
   ;; Insert text at `start-line`
@@ -18,24 +21,21 @@
 
 ;; TODO: Support charwise selection. (can use nvim_buf_set_text?)
 (fn run [start-line end-line]
-  (let [;; Make it 0-indexed. Don't adjust `end-line` bc it's end-exclusive.
-        start-line (- start-line 1)
-        input (vim.api.nvim_buf_get_lines 0 start-line end-line true)
-        filename (vim.fn.tempname)]
-    (create-file filename (table.concat input "\n"))
-    ;; NOTE: Not using `io.popen` as it seems to pipe its stderr into nvim's
-    ;; stderr, messing up the nvim TUI.
-    (local lines (vim.fn.systemlist (.. (antifennel-script) " " filename)))
-    (local has-err (not= 0 vim.v.shell_error))
-    (if has-err
-        (vim.api.nvim_err_writeln (.. "[nvim-antifennel] "
-                                      (table.concat lines "\n")))
-        (do
-          ;; Remove last line if it's empty
-          (when (= "" (. lines (length lines)))
-            (table.remove lines))
-          (replace-lines start-line end-line lines)))
-    (os.remove filename)))
+  ;; Make it 0-indexed. Don't adjust `end-line` bc it's end-exclusive.
+  (local start-line (- start-line 1))
+  (local tmpfile (vim.fn.tempname))
+  (local lua-chunk (-> (vim.api.nvim_buf_get_lines 0 start-line end-line true)
+                       (table.concat "\n")))
+  (create-file tmpfile lua-chunk)
+  ;; NOTE: Not using `io.popen` as it seems to pipe its stderr into nvim's
+  ;; stderr, messing up the nvim TUI.
+  (local cmd (.. (antifennel-script) " " (vim.fn.shellescape tmpfile)))
+  (local lines (vim.fn.systemlist cmd))
+  (if (= 0 vim.v.shell_error)
+      (replace-lines start-line end-line lines)
+      (vim.api.nvim_err_writeln (.. "[nvim-antifennel] "
+                                    (table.concat lines "\n"))))
+  (os.remove tmpfile))
 
 {: run}
 

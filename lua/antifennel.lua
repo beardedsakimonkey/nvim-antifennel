@@ -12,25 +12,25 @@ local function antifennel_script()
   return path
 end
 local function replace_lines(start_line, end_line, lines)
+  if ("" == lines[#lines]) then
+    table.remove(lines)
+  else
+  end
   vim.api.nvim_buf_set_lines(0, start_line, end_line, true, {})
   return vim.api.nvim_buf_set_lines(0, start_line, start_line, true, lines)
 end
 local function run(start_line, end_line)
   local start_line0 = (start_line - 1)
-  local input = vim.api.nvim_buf_get_lines(0, start_line0, end_line, true)
-  local filename = vim.fn.tempname()
-  create_file(filename, table.concat(input, "\n"))
-  local lines = vim.fn.systemlist((antifennel_script() .. " " .. filename))
-  local has_err = (0 ~= vim.v.shell_error)
-  if has_err then
-    vim.api.nvim_err_writeln(("[nvim-antifennel] " .. table.concat(lines, "\n")))
-  else
-    if ("" == lines[#lines]) then
-      table.remove(lines)
-    else
-    end
+  local tmpfile = vim.fn.tempname()
+  local lua_chunk = table.concat(vim.api.nvim_buf_get_lines(0, start_line0, end_line, true), "\n")
+  create_file(tmpfile, lua_chunk)
+  local cmd = (antifennel_script() .. " " .. vim.fn.shellescape(tmpfile))
+  local lines = vim.fn.systemlist(cmd)
+  if (0 == vim.v.shell_error) then
     replace_lines(start_line0, end_line, lines)
+  else
+    vim.api.nvim_err_writeln(("[nvim-antifennel] " .. table.concat(lines, "\n")))
   end
-  return os.remove(filename)
+  return os.remove(tmpfile)
 end
 return {run = run}
