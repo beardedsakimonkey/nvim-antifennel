@@ -21,7 +21,7 @@
 
 ;; TODO: Support charwise selection. (can use nvim_buf_set_text?)
 (fn run [start-line end-line]
-  ;; Make it 0-indexed. Don't adjust `end-line` bc it's end-exclusive.
+  ;; Make it 0-indexed. Don't adjust `end-line` bc it's used as end-exclusive.
   (local start-line (- start-line 1))
   (local tmpfile (vim.fn.tempname))
   (local lua-chunk (-> (vim.api.nvim_buf_get_lines 0 start-line end-line true)
