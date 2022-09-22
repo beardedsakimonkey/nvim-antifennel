@@ -8,7 +8,7 @@ local function antifennel_script()
   local source = _local_1_["source"]
   local dirname = string.sub(source, 2, (string.len("/lua/antifennel.lua") * -1))
   local sep = (package.config):sub(1, 1)
-  local path = (dirname .. ("vendor" .. sep .. "antifennel"))
+  local path = (dirname .. "vendor" .. sep .. "antifennel")
   return path
 end
 local function replace_lines(start_line, end_line, lines)
@@ -24,8 +24,7 @@ local function run(start_line, end_line)
   local tmpfile = vim.fn.tempname()
   local lua_chunk = table.concat(vim.api.nvim_buf_get_lines(0, start_line0, end_line, true), "\n")
   create_file(tmpfile, lua_chunk)
-  local cmd = (antifennel_script() .. " " .. vim.fn.shellescape(tmpfile))
-  local lines = vim.fn.systemlist(cmd)
+  local lines = vim.fn.systemlist((antifennel_script() .. " " .. vim.fn.shellescape(tmpfile)))
   if (0 == vim.v.shell_error) then
     replace_lines(start_line0, end_line, lines)
   else
