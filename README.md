@@ -5,7 +5,7 @@ the entire file if not in visual mode) through
 [antifennel](https://git.sr.ht/~technomancy/antifennel) and replaces the selection with the output.
 
 This plugin vendors in `antifennel` for convenience (currently
-[9745af08](https://git.sr.ht/~technomancy/antifennel/commit/9745af08b2e9e611673a5394de334ce5a49ce382)).
+[a9d3c5ec](https://git.sr.ht/~technomancy/antifennel/commit/a9d3c5ec5de8f2ce5b77e320bbe4c98d9b8d2832)).
 
 ## Copyright
 

@@ -5824,7 +5824,7 @@ if not pcall(require, "ffi") then
   package.loaded.ffi.typeof = _1_
   local ___band___ = load("return function(a, b) return a & b end")()
   local ___rshift___ = load("return function(a, b) return a >> b end")()
-  _G.bit = {rshift = ___rshift___, band = ___band___}
+  _G.bit = {band = ___band___, rshift = ___rshift___}
 else
 end
 if os.getenv("FNL") then
@@ -5841,10 +5841,10 @@ package.preload["lang.lexer"] = package.preload["lang.lexer"] or function(...)
   local ASCII_a, ASCII_f, ASCII_z = 97, 102, 122
   local ASCII_A, ASCII_Z = 65, 90
   local END_OF_STREAM = ( - 1)
-  local Reserved_keyword = {["false"] = 7, ["break"] = 2, ["else"] = 4, ["local"] = 13, ["not"] = 15, ["if"] = 11, ["return"] = 18, ["for"] = 8, ["do"] = 3, ["or"] = 16, ["while"] = 22, ["nil"] = 14, ["until"] = 21, ["and"] = 1, ["then"] = 19, ["goto"] = 10, ["repeat"] = 17, ["elseif"] = 5, ["true"] = 20, ["function"] = 9, ["end"] = 6, ["in"] = 12}
+  local Reserved_keyword = {["and"] = 1, ["break"] = 2, ["do"] = 3, ["else"] = 4, ["elseif"] = 5, ["end"] = 6, ["false"] = 7, ["for"] = 8, ["function"] = 9, ["goto"] = 10, ["if"] = 11, ["in"] = 12, ["local"] = 13, ["nil"] = 14, ["not"] = 15, ["or"] = 16, ["repeat"] = 17, ["return"] = 18, ["then"] = 19, ["true"] = 20, ["until"] = 21, ["while"] = 22}
   local uint64, int64 = ffi.typeof("uint64_t"), ffi.typeof("int64_t")
   local complex = ffi.typeof("complex")
-  local Token_symbol = {TK_le = "<=", TK_ne = "~=", TK_ge = ">=", TK_eq = "==", TK_eof = "<eof>", TK_concat = ".."}
+  local Token_symbol = {TK_concat = "..", TK_eof = "<eof>", TK_eq = "==", TK_ge = ">=", TK_le = "<=", TK_ne = "~="}
   local function token2str(tok)
     if string.match(tok, "^TK_") then
       return (Token_symbol[tok] or string.sub(tok, 4))
@@ -6108,7 +6108,7 @@ package.preload["lang.lexer"] = package.preload["lang.lexer"] or function(...)
       return nil
     end
   end
-  local Escapes = {b = "\8", f = "\12", n = "\n", r = "\13", v = "\11", a = "\7", t = "\9"}
+  local Escapes = {a = "\7", b = "\8", f = "\12", n = "\n", r = "\13", t = "\9", v = "\11"}
   local function hex_char(c)
     if string.match(c, "^%x") then
       local b = ___band___(strbyte(c), 15)
@@ -6340,7 +6340,7 @@ package.preload["lang.lexer"] = package.preload["lang.lexer"] or function(...)
     end
     return nil
   end
-  local Lexer = {token2str = token2str, error = lex_error}
+  local Lexer = {error = lex_error, token2str = token2str}
   Lexer.next = function(ls)
     ls.lastline = ls.linenumber
     if (ls.tklookahead == "TK_eof") then
@@ -6363,7 +6363,7 @@ package.preload["lang.lexer"] = package.preload["lang.lexer"] or function(...)
   local Lexer_class = {__index = Lexer}
   local function lex_setup(read_func, chunkname)
     local header = false
-    local ls = {space_buf = "", lastline = 1, n = 0, linenumber = 1, read_func = read_func, chunkname = chunkname, tklookahead = "TK_eof"}
+    local ls = {chunkname = chunkname, lastline = 1, linenumber = 1, n = 0, read_func = read_func, space_buf = "", tklookahead = "TK_eof"}
     nextchar(ls)
     if ((((ls.current == "\239") and (ls.n >= 2)) and (byte(ls, 0) == "\187")) and (byte(ls, 1) == "\191")) then
       ls.n = (ls.n - 2)
@@ -6399,7 +6399,7 @@ local parse
 package.preload["lang.parser"] = package.preload["lang.parser"] or function(...)
   local operator = require("lang.operator")
   local LJ_52 = false
-  local End_of_block = {TK_until = true, TK_elseif = true, TK_eof = true, TK_end = true, TK_else = true}
+  local End_of_block = {TK_else = true, TK_elseif = true, TK_end = true, TK_eof = true, TK_until = true}
   local function err_syntax(ls, em)
     return ls:error(ls.token, em)
   end
@@ -6962,7 +6962,7 @@ package.preload["lang.parser"] = package.preload["lang.parser"] or function(...)
   return parse
 end
 package.preload["lang.operator"] = package.preload["lang.operator"] or function(...)
-  local binop = {["-"] = ((6 * 256) + 6), ["<"] = ((3 * 256) + 3), ["=="] = ((3 * 256) + 3), ["<="] = ((3 * 256) + 3), [".."] = ((5 * 256) + 4), ["~="] = ((3 * 256) + 3), [">"] = ((3 * 256) + 3), ["+"] = ((6 * 256) + 6), ["/"] = ((7 * 256) + 7), ["*"] = ((7 * 256) + 7), ["or"] = ((1 * 256) + 1), ["and"] = ((2 * 256) + 2), [">="] = ((3 * 256) + 3), ["%"] = ((7 * 256) + 7), ["^"] = ((10 * 256) + 9)}
+  local binop = {["%"] = ((7 * 256) + 7), ["*"] = ((7 * 256) + 7), ["+"] = ((6 * 256) + 6), ["-"] = ((6 * 256) + 6), [".."] = ((5 * 256) + 4), ["/"] = ((7 * 256) + 7), ["<"] = ((3 * 256) + 3), ["<="] = ((3 * 256) + 3), ["=="] = ((3 * 256) + 3), [">"] = ((3 * 256) + 3), [">="] = ((3 * 256) + 3), ["^"] = ((10 * 256) + 9), ["and"] = ((2 * 256) + 2), ["or"] = ((1 * 256) + 1), ["~="] = ((3 * 256) + 3)}
   local unary_priority = 8
   local ident_priority = 16
   local function is_binop(op)
@@ -6974,7 +6974,7 @@ package.preload["lang.operator"] = package.preload["lang.operator"] or function(
   local function right_priority(op)
     return bit.band(binop[op], 255)
   end
-  return {left_priority = left_priority, unary_priority = unary_priority, is_binop = is_binop, ident_priority = ident_priority, right_priority = right_priority}
+  return {ident_priority = ident_priority, is_binop = is_binop, left_priority = left_priority, right_priority = right_priority, unary_priority = unary_priority}
 end
 parse = require("lang.parser")
 local lua_ast
@@ -6985,7 +6985,7 @@ package.preload["lang.lua_ast"] = package.preload["lang.lua_ast"] or function(..
     return node
   end
   local function ident(ast, name, line, field)
-    return build("Identifier", {name = ast.mangle(name, field), line = line})
+    return build("Identifier", {line = line, name = ast.mangle(name, field)})
   end
   local function does_multi_return(expr)
     local k = expr.kind
@@ -6993,10 +6993,10 @@ package.preload["lang.lua_ast"] = package.preload["lang.lua_ast"] or function(..
   end
   local AST = {}
   local function func_decl(id, body, params, vararg, locald, firstline, lastline)
-    return build("FunctionDeclaration", {vararg = vararg, firstline = firstline, lastline = lastline, id = id, params = params, body = body, line = firstline, locald = locald})
+    return build("FunctionDeclaration", {body = body, firstline = firstline, id = id, lastline = lastline, line = firstline, locald = locald, params = params, vararg = vararg})
   end
   local function func_expr(body, params, vararg, firstline, lastline)
-    return build("FunctionExpression", {vararg = vararg, firstline = firstline, lastline = lastline, params = params, body = body})
+    return build("FunctionExpression", {body = body, firstline = firstline, lastline = lastline, params = params, vararg = vararg})
   end
   AST.expr_function = function(ast, args, body, proto)
     return func_expr(body, args, proto.varargs, proto.firstline, proto.lastline)
@@ -7020,24 +7020,24 @@ package.preload["lang.lua_ast"] = package.preload["lang.lua_ast"] or function(..
     return params
   end
   AST.chunk = function(ast, body, chunkname, firstline, lastline)
-    return build("Chunk", {lastline = lastline, body = body, chunkname = chunkname, firstline = firstline})
+    return build("Chunk", {body = body, chunkname = chunkname, firstline = firstline, lastline = lastline})
   end
   AST.local_decl = function(ast, vlist, exps, line)
     local ids = {}
     for k = 1, #vlist do
       ids[k] = ast:var_declare(vlist[k])
     end
-    return build("LocalDeclaration", {names = ids, line = line, expressions = exps})
+    return build("LocalDeclaration", {expressions = exps, line = line, names = ids})
   end
   AST.assignment_expr = function(ast, vars, exps, line)
-    return build("AssignmentExpression", {right = exps, left = vars, line = line})
+    return build("AssignmentExpression", {left = vars, line = line, right = exps})
   end
   AST.expr_index = function(ast, v, index, line)
-    return build("MemberExpression", {object = v, line = line, property = index, computed = true})
+    return build("MemberExpression", {computed = true, line = line, object = v, property = index})
   end
   AST.expr_property = function(ast, v, prop, line)
     local index = ident(ast, prop, line, true)
-    return build("MemberExpression", {object = v, line = line, property = index, computed = false})
+    return build("MemberExpression", {line = line, object = v, property = index, computed = false})
   end
   AST.literal = function(ast, val)
     return build("Literal", {value = val})
@@ -7058,10 +7058,10 @@ package.preload["lang.lua_ast"] = package.preload["lang.lua_ast"] or function(..
     end
   end
   AST.expr_table = function(ast, keyvals, line)
-    return build("Table", {line = line, keyvals = keyvals})
+    return build("Table", {keyvals = keyvals, line = line})
   end
   AST.expr_unop = function(ast, op, v, line)
-    return build("UnaryExpression", {argument = v, operator = op, line = line})
+    return build("UnaryExpression", {argument = v, line = line, operator = op})
   end
   local function concat_append(ts, node)
     local n = #ts
@@ -7076,7 +7076,7 @@ package.preload["lang.lua_ast"] = package.preload["lang.lua_ast"] or function(..
     end
   end
   AST.expr_binop = function(ast, op, expa, expb, line)
-    local binop_body = ((op ~= "..") and {right = expb, left = expa, line = line, operator = op})
+    local binop_body = ((op ~= "..") and {left = expa, line = line, operator = op, right = expb})
     if binop_body then
       if ((op == "and") or (op == "or")) then
         return build("LogicalExpression", binop_body)
@@ -7087,7 +7087,7 @@ package.preload["lang.lua_ast"] = package.preload["lang.lua_ast"] or function(..
       local terms = {}
       concat_append(terms, expa)
       concat_append(terms, expb)
-      return build("ConcatenateExpression", {terms = terms, line = expa.line})
+      return build("ConcatenateExpression", {line = expa.line, terms = terms})
     end
   end
   AST.identifier = function(ast, name)
@@ -7095,13 +7095,13 @@ package.preload["lang.lua_ast"] = package.preload["lang.lua_ast"] or function(..
   end
   AST.expr_method_call = function(ast, v, key, args, line)
     local m = ident(ast, key, nil, true)
-    return build("SendExpression", {line = line, method = m, arguments = args, receiver = v})
+    return build("SendExpression", {arguments = args, line = line, method = m, receiver = v})
   end
   AST.expr_function_call = function(ast, v, args, line)
-    return build("CallExpression", {line = line, arguments = args, callee = v})
+    return build("CallExpression", {arguments = args, callee = v, line = line})
   end
   AST.return_stmt = function(ast, exps, line)
-    return build("ReturnStatement", {line = line, arguments = exps})
+    return build("ReturnStatement", {arguments = exps, line = line})
   end
   AST.break_stmt = function(ast, line)
     return build("BreakStatement", {line = line})
@@ -7110,27 +7110,27 @@ package.preload["lang.lua_ast"] = package.preload["lang.lua_ast"] or function(..
     return build("LabelStatement", {label = name, line = line})
   end
   AST.new_statement_expr = function(ast, expr, line)
-    return build("ExpressionStatement", {line = line, expression = expr})
+    return build("ExpressionStatement", {expression = expr, line = line})
   end
   AST.if_stmt = function(ast, tests, cons, else_branch, line)
-    return build("IfStatement", {tests = tests, line = line, alternate = else_branch, cons = cons})
+    return build("IfStatement", {alternate = else_branch, cons = cons, line = line, tests = tests})
   end
   AST.do_stmt = function(ast, body, line, lastline)
-    return build("DoStatement", {line = line, body = body, lastline = lastline})
+    return build("DoStatement", {body = body, lastline = lastline, line = line})
   end
   AST.while_stmt = function(ast, test, body, line, lastline)
-    return build("WhileStatement", {line = line, body = body, test = test, lastline = lastline})
+    return build("WhileStatement", {body = body, lastline = lastline, line = line, test = test})
   end
   AST.repeat_stmt = function(ast, test, body, line, lastline)
-    return build("RepeatStatement", {line = line, body = body, test = test, lastline = lastline})
+    return build("RepeatStatement", {body = body, lastline = lastline, line = line, test = test})
   end
   AST.for_stmt = function(ast, ___var___, init, last, step, body, line, lastline)
-    local for_init = build("ForInit", {line = line, id = ___var___, value = init})
-    return build("ForStatement", {step = step, lastline = lastline, line = line, init = for_init, last = last, body = body})
+    local for_init = build("ForInit", {id = ___var___, line = line, value = init})
+    return build("ForStatement", {body = body, init = for_init, last = last, lastline = lastline, line = line, step = step})
   end
   AST.for_iter_stmt = function(ast, vars, exps, body, line, lastline)
-    local names = build("ForNames", {names = vars, line = line})
-    return build("ForInStatement", {explist = exps, lastline = lastline, body = body, line = line, namelist = names})
+    local names = build("ForNames", {line = line, names = vars})
+    return build("ForInStatement", {body = body, explist = exps, lastline = lastline, line = line, namelist = names})
   end
   AST.goto_stmt = function(ast, name, line)
     return build("GotoStatement", {label = name, line = line})
@@ -7152,7 +7152,7 @@ package.preload["lang.lua_ast"] = package.preload["lang.lua_ast"] or function(..
   end
   local ASTClass = {__index = AST}
   local function new_scope(parent_scope)
-    return {vars = {}, parent = parent_scope}
+    return {parent = parent_scope, vars = {}}
   end
   local function new_variables_registry(create, ___match___)
     local function declare(self, name)
@@ -7182,7 +7182,7 @@ package.preload["lang.lua_ast"] = package.preload["lang.lua_ast"] or function(..
       end
       return nil
     end
-    return {scope_exit = scope_exit, lookup = lookup, scope_enter = scope_enter, declare = declare}
+    return {declare = declare, lookup = lookup, scope_enter = scope_enter, scope_exit = scope_exit}
   end
   local function default_mangle(name)
     return name
@@ -7246,7 +7246,7 @@ package.preload["lang.id_generator"] = package.preload["lang.id_generator"] or f
     end
     return nil
   end
-  return {genid = genid, close_gen_variables = close_gen_variables}
+  return {close_gen_variables = close_gen_variables, genid = genid}
 end
 lua_ast = require("lang.lua_ast")
 local reader
@@ -7696,7 +7696,7 @@ package.preload["anticompiler"] = package.preload["anticompiler"] or function(..
     if target.computed then
       do
         local _200_ = target.property
-        if ((_G.type(_200_) == "table") and (nil ~= (_200_).value) and ((_200_).kind == "Literal")) then
+        if ((_G.type(_200_) == "table") and ((_200_).kind == "Literal") and (nil ~= (_200_).value)) then
           local value = (_200_).value
           for char in value:gmatch(".") do
             assert(sym_char_3f(char), ("Illegal assignment: " .. value))
@@ -8020,6 +8020,7 @@ local fnlfmt
 package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
   local fennel = require("fennel")
   local unpack = (table.unpack or _G.unpack)
+  local syntax = fennel.syntax()
   local function last_line_length(line)
     return #line:match("[^\n]*$")
   end
@@ -8129,7 +8130,6 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
     table.insert(out, close)
     return table.concat(out)
   end
-  local init_bindings = {collect = true, each = true, ["for"] = true, icollect = true, let = true, ["with-open"] = true}
   local fn_forms = {fn = true, lambda = true, ["\206\187"] = true, macro = true}
   local force_initial_newline = {["do"] = true, ["eval-compiler"] = true}
   local function view_init_body(t, view, inspector, start_indent, out, callee)
@@ -8145,7 +8145,19 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
       indent = (start_indent + #callee)
     end
     local second
-    if (init_bindings[callee] and ("unquote" ~= tostring(t[2][1]))) then
+    local function _262_()
+      local t_263_ = syntax
+      if (nil ~= t_263_) then
+        t_263_ = (t_263_)[callee]
+      else
+      end
+      if (nil ~= t_263_) then
+        t_263_ = (t_263_)["binding-form?"]
+      else
+      end
+      return t_263_
+    end
+    if (_262_() and ("unquote" ~= tostring(t[2][1]))) then
       second = view_binding(t[2], view, inspector, (indent + 1), ("let" == callee), "[", "]")
     else
       second = view(t[2], inspector, indent)
@@ -8228,14 +8240,14 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
     return table.insert(out, (" " .. view_binding({select(2, unpack(t))}, view, inspector, indent, true, "", "")))
   end
   local function if_pair(view, a, b, c)
-    local function _270_()
+    local function _274_()
       if fennel["comment?"](c) then
         return (" " .. view(c))
       else
         return ""
       end
     end
-    return (view(a) .. " " .. view(b) .. _270_())
+    return (view(a) .. " " .. view(b) .. _274_())
   end
   local function pairwise_if_3f(t, indent, i, view)
     if (#strip_comments(t) < 5) then
@@ -8247,21 +8259,21 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
     elseif (80 < (indent + 1 + #if_pair(view, select(i, unpack(t))))) then
       return false
     else
-      local _271_
+      local _275_
       if fennel.comment(t[(i + 2)]) then
-        _271_ = (i + 3)
+        _275_ = (i + 3)
       else
-        _271_ = (i + 2)
+        _275_ = (i + 2)
       end
-      return pairwise_if_3f(t, indent, _271_, view)
+      return pairwise_if_3f(t, indent, _275_, view)
     end
   end
-  local function originally_different_lines_3f(_274_, line)
-    local _arg_275_ = _274_
-    local _ = _arg_275_[1]
-    local first = _arg_275_[2]
-    local second = _arg_275_[3]
-    return (("table" == type(first)) and ("table" == type(second)) and (function(_276_,_277_,_278_) return (_276_ ~= _277_) or (_277_ ~= _278_) end)(line,(first.line or line),(second.line or line)))
+  local function originally_different_lines_3f(_278_, line)
+    local _arg_279_ = _278_
+    local _ = _arg_279_[1]
+    local first = _arg_279_[2]
+    local second = _arg_279_[3]
+    return (("table" == type(first)) and ("table" == type(second)) and (function(_280_,_281_,_282_) return (_280_ ~= _281_) or (_281_ ~= _282_) end)(line,(first.line or line),(second.line or line)))
   end
   local function view_maybe_body(t, view, inspector, indent, start_indent, out, callee)
     if pairwise_if_3f(t, indent, 2, view) then
@@ -8283,7 +8295,6 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
   local function sweeten(t, view, inspector, indent, view_list)
     return (sugars[tostring(t[1])] .. view(t[2], inspector, (indent + 1)))
   end
-  local body_specials = {collect = true, ["do"] = true, each = true, ["eval-compiler"] = true, fn = true, ["for"] = true, icollect = true, lambda = true, let = true, macro = true, match = true, when = true, ["while"] = true, ["with-open"] = true, ["\206\187"] = true}
   local maybe_body = {["->"] = true, ["->>"] = true, ["-?>"] = true, ["-?>>"] = true, doto = true, ["if"] = true}
   local renames = {["#"] = "length", ["~="] = "not="}
   local function view_list(t, view, inspector, start_indent)
@@ -8294,12 +8305,38 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
       local callee0 = (renames[callee] or callee)
       local out = {"(", callee0}
       local indent
-      if body_specials[callee0] then
+      local _286_
+      do
+        local t_285_ = syntax
+        if (nil ~= t_285_) then
+          t_285_ = (t_285_)[callee0]
+        else
+        end
+        if (nil ~= t_285_) then
+          t_285_ = (t_285_)["body-form?"]
+        else
+        end
+        _286_ = t_285_
+      end
+      if _286_ then
         indent = (start_indent + 2)
       else
         indent = (start_indent + #callee0 + 2)
       end
-      if body_specials[callee0] then
+      local _291_
+      do
+        local t_290_ = syntax
+        if (nil ~= t_290_) then
+          t_290_ = (t_290_)[callee0]
+        else
+        end
+        if (nil ~= t_290_) then
+          t_290_ = (t_290_)["body-form?"]
+        else
+        end
+        _291_ = t_290_
+      end
+      if _291_ then
         view_body(t, view, inspector, indent, out, callee0)
       elseif maybe_body[callee0] then
         view_maybe_body(t, view, inspector, indent, start_indent, out, callee0)
@@ -8312,21 +8349,35 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
     end
   end
   local slength
-  local function _284_(...)
-    local _285_ = rawget(_G, "utf8")
-    if (nil ~= _285_) then
-      return (_285_).len
+  local function _296_(...)
+    local _297_ = rawget(_G, "utf8")
+    if (nil ~= _297_) then
+      return (_297_).len
     else
-      return _285_
+      return _297_
     end
   end
-  local function _287_(_241)
+  local function _299_(_241)
     return #_241
   end
-  slength = (_284_(...) or _287_)
-  local function maybe_attach_comment(x, indent, c)
-    if c then
-      return (tostring(c) .. "\n" .. string.rep(" ", indent) .. x)
+  slength = (_296_(...) or _299_)
+  local function maybe_attach_comment(x, indent, cs)
+    if (cs and (0 < #cs)) then
+      local _300_
+      do
+        local tbl_15_auto = {}
+        local i_16_auto = #tbl_15_auto
+        for _, c in ipairs(cs) do
+          local val_17_auto = tostring(c)
+          if (nil ~= val_17_auto) then
+            i_16_auto = (i_16_auto + 1)
+            do end (tbl_15_auto)[i_16_auto] = val_17_auto
+          else
+          end
+        end
+        _300_ = tbl_15_auto
+      end
+      return (table.concat(_300_, ("\n" .. string.rep(" ", indent))) .. ("\n" .. string.rep(" ", indent)) .. x)
     else
       return x
     end
@@ -8343,72 +8394,81 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
       k = view(key, inspector, (indent + 1), true)
     end
     local v = view(val, inspector, (indent + slength(k) + 1))
-    local function _291_()
-      local t_290_ = mt
-      if (nil ~= t_290_) then
-        t_290_ = (t_290_).comments
+    local function _305_()
+      local t_304_ = mt
+      if (nil ~= t_304_) then
+        t_304_ = (t_304_).comments
       else
       end
-      if (nil ~= t_290_) then
-        t_290_ = (t_290_).keys
+      if (nil ~= t_304_) then
+        t_304_ = (t_304_).keys
       else
       end
-      if (nil ~= t_290_) then
-        t_290_ = (t_290_)[key]
+      if (nil ~= t_304_) then
+        t_304_ = (t_304_)[key]
       else
       end
-      return t_290_
+      return t_304_
     end
-    local function _296_()
-      local t_295_ = mt
-      if (nil ~= t_295_) then
-        t_295_ = (t_295_).comments
+    local function _310_()
+      local t_309_ = mt
+      if (nil ~= t_309_) then
+        t_309_ = (t_309_).comments
       else
       end
-      if (nil ~= t_295_) then
-        t_295_ = (t_295_).values
+      if (nil ~= t_309_) then
+        t_309_ = (t_309_).values
       else
       end
-      if (nil ~= t_295_) then
-        t_295_ = (t_295_)[val]
+      if (nil ~= t_309_) then
+        t_309_ = (t_309_)[val]
       else
       end
-      return t_295_
+      return t_309_
     end
-    return (maybe_attach_comment(k, indent, _291_()) .. " " .. maybe_attach_comment(v, indent, _296_()))
+    return (maybe_attach_comment(k, indent, _305_()) .. " " .. maybe_attach_comment(v, indent, _310_()))
   end
-  local function view_multiline_kv(pair_strs, indent, last_comment)
-    if last_comment then
-      local _301_
-      do
-        local _300_ = pair_strs
-        table.insert(_300_, tostring(last_comment))
-        table.insert(_300_, "}")
-        _301_ = _300_
+  local function view_multiline_kv(pair_strs, indent, last_comments)
+    if (last_comments and (0 < #last_comments)) then
+      for _, c in ipairs(last_comments) do
+        table.insert(pair_strs, tostring(c))
       end
-      return ("{" .. table.concat(_301_, ("\n" .. string.rep(" ", indent))))
+      table.insert(pair_strs, "}")
+      return ("{" .. table.concat(pair_strs, ("\n" .. string.rep(" ", indent))))
     else
       return ("{" .. table.concat(pair_strs, ("\n" .. string.rep(" ", indent))) .. "}")
+    end
+  end
+  local function sorter(a, b)
+    if (type(a) == type(b)) then
+      return (a < b)
+    else
+      return (tostring(a) < tostring(b))
     end
   end
   local function view_kv(t, view, inspector, indent)
     local indent0 = (indent + 1)
     local mt = getmetatable(t)
     local keys
-    local function _303_()
-      local tbl_15_auto = {}
-      local i_16_auto = #tbl_15_auto
-      for k in pairs(t) do
-        local val_17_auto = k
-        if (nil ~= val_17_auto) then
-          i_16_auto = (i_16_auto + 1)
-          do end (tbl_15_auto)[i_16_auto] = val_17_auto
-        else
+    local function _316_()
+      local _317_
+      do
+        local tbl_15_auto = {}
+        local i_16_auto = #tbl_15_auto
+        for k in pairs(t) do
+          local val_17_auto = k
+          if (nil ~= val_17_auto) then
+            i_16_auto = (i_16_auto + 1)
+            do end (tbl_15_auto)[i_16_auto] = val_17_auto
+          else
+          end
         end
+        _317_ = tbl_15_auto
       end
-      return tbl_15_auto
+      table.sort(_317_, sorter)
+      return _317_
     end
-    keys = (mt.keys or _303_())
+    keys = (mt.keys or _316_())
     local pair_strs
     do
       local tbl_15_auto = {}
@@ -8424,32 +8484,36 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
       pair_strs = tbl_15_auto
     end
     local oneline = ("{" .. table.concat(pair_strs, " ") .. "}")
-    local function _306_()
-      local t_307_ = mt
-      if (nil ~= t_307_) then
-        t_307_ = (t_307_).comments
+    local function _320_()
+      local t_321_ = mt
+      if (nil ~= t_321_) then
+        t_321_ = (t_321_).comments
       else
       end
-      if (nil ~= t_307_) then
-        t_307_ = (t_307_).last
+      if (nil ~= t_321_) then
+        t_321_ = (t_321_).last
       else
       end
-      return t_307_
+      if (nil ~= t_321_) then
+        t_321_ = (t_321_)[1]
+      else
+      end
+      return t_321_
     end
-    if (oneline:match("\n") or _306_() or ((indent0 + #oneline) > inspector["line-length"])) then
-      local function _311_()
-        local t_310_ = mt
-        if (nil ~= t_310_) then
-          t_310_ = (t_310_).comments
+    if (oneline:match("\n") or _320_() or ((indent0 + #oneline) > inspector["line-length"])) then
+      local function _326_()
+        local t_325_ = mt
+        if (nil ~= t_325_) then
+          t_325_ = (t_325_).comments
         else
         end
-        if (nil ~= t_310_) then
-          t_310_ = (t_310_).last
+        if (nil ~= t_325_) then
+          t_325_ = (t_325_).last
         else
         end
-        return t_310_
+        return t_325_
       end
-      return view_multiline_kv(pair_strs, indent0, _311_())
+      return view_multiline_kv(pair_strs, indent0, _326_())
     else
       return oneline
     end
@@ -8469,14 +8533,14 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
     return root
   end
   local function set_fennelview_metamethod(idx, form, parent)
-    if (("table" == type(form)) and not fennel["sym?"](form) and not fennel["comment?"](form) and (fennel.varg() ~= form)) then
+    if (("table" == type(form)) and not fennel["sym?"](form) and not fennel["comment?"](form) and not fennel["varg?"](form)) then
       if (not fennel["list?"](form) and not fennel["sequence?"](form)) then
-        local _316_ = getmetatable(form)
-        if (nil ~= _316_) then
-          local mt = _316_
+        local _331_ = getmetatable(form)
+        if (nil ~= _331_) then
+          local mt = _331_
           mt["__fennelview"] = view_kv
         elseif true then
-          local _ = _316_
+          local _ = _331_
           setmetatable(form, {__fennelview = view_kv})
         else
         end
@@ -8488,12 +8552,12 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
     end
   end
   local function prefer_colon_3f(s)
-    return (s:find("^[-%w?^_!$%&*+./@|<=>]+$") and not s:find("^[-?^_!$%&*+./@|<=>%\\]+$"))
+    return (s:find("^[-%w?^_!$%&*+./|<=>]+$") and not s:find("^[-?^_!$%&*+./@|<=>%\\]+$"))
   end
   local function fnlfmt(ast)
-    local _let_320_ = getmetatable(fennel.list())
-    local list_mt = _let_320_
-    local __fennelview = _let_320_["__fennelview"]
+    local _let_335_ = getmetatable(fennel.list())
+    local list_mt = _let_335_
+    local __fennelview = _let_335_["__fennelview"]
     local _
     list_mt.__fennelview = view_list
     _ = nil
@@ -8506,16 +8570,16 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
   local function space_out_forms_3f(prev_ast, ast)
     return not (prev_ast.line and ast.line and (1 == (ast.line - prev_ast.line)))
   end
-  local function format_file(filename, _321_)
-    local _arg_322_ = _321_
-    local no_comments = _arg_322_["no-comments"]
+  local function format_file(filename, _336_)
+    local _arg_337_ = _336_
+    local no_comments = _arg_337_["no-comments"]
     local f
     do
-      local _323_ = filename
-      if (_323_ == "-") then
+      local _338_ = filename
+      if (_338_ == "-") then
         f = io.stdin
       elseif true then
-        local _ = _323_
+        local _ = _338_
         f = assert(io.open(filename, "r"), "File not found.")
       else
         f = nil
@@ -8548,7 +8612,7 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
     table.insert(out, "")
     return table.concat(out, "\n")
   end
-  return {fnlfmt = fnlfmt, ["format-file"] = format_file, version = "0.2.1-dev"}
+  return {fnlfmt = fnlfmt, ["format-file"] = format_file, version = "0.2.4-dev"}
 end
 fnlfmt = require("fnlfmt")
 local reserved = {}
@@ -8593,12 +8657,12 @@ if ((debug and debug.getinfo) and (debug.getinfo(3) == nil)) then
     return os.exit(1)
   end
 else
-  local function _330_(str, source)
+  local function _345_(str, source)
     local out = {}
     for _, code in ipairs(compile(reader.string(str), (source or "*source"))) do
       table.insert(out, fnlfmt.fnlfmt(code))
     end
     return table.concat(out, "\n")
   end
-  return _330_
+  return _345_
 end
