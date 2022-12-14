@@ -7696,7 +7696,7 @@ package.preload["anticompiler"] = package.preload["anticompiler"] or function(..
     if target.computed then
       do
         local _200_ = target.property
-        if ((_G.type(_200_) == "table") and ((_200_).kind == "Literal") and (nil ~= (_200_).value)) then
+        if ((_G.type(_200_) == "table") and (nil ~= (_200_).value) and ((_200_).kind == "Literal")) then
           local value = (_200_).value
           for char in value:gmatch(".") do
             assert(sym_char_3f(char), ("Illegal assignment: " .. value))
@@ -7961,7 +7961,12 @@ package.preload["letter"] = package.preload["letter"] or function(...)
     local bindings = {}
     table.insert(node, 2, bindings)
     do end (node)[1] = fennel.sym("let")
-    return locals_to_bindings(node, bindings)
+    locals_to_bindings(node, bindings)
+    if (2 == #node) then
+      return table.insert(node, fennel.sym("nil"))
+    else
+      return nil
+    end
   end
   local function body_start(node)
     local has_name_3f = fennel["sym?"](node[2])
@@ -7981,11 +7986,11 @@ package.preload["letter"] = package.preload["letter"] or function(...)
     return (("table" == type(node)) and ("do" == tostring(node[1])) and ("table" == type(node[2])) and ("local" == tostring(node[2][1])))
   end
   local function fn_local_node_3f(node)
-    local function _244_()
+    local function _245_()
       local first_body = node[body_start(node)]
       return (("table" == type(first_body)) and ("local" == tostring(first_body[1])))
     end
-    return (("table" == type(node)) and ("fn" == tostring(node[1])) and _244_())
+    return (("table" == type(node)) and ("fn" == tostring(node[1])) and _245_())
   end
   local function letter(idx, node)
     if fn_local_node_3f(node) then
@@ -8025,7 +8030,7 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
     return #line:match("[^\n]*$")
   end
   local function any_3f(tbl, pred)
-    local _248_
+    local _249_
     do
       local tbl_15_auto = {}
       local i_16_auto = #tbl_15_auto
@@ -8042,9 +8047,9 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
         else
         end
       end
-      _248_ = tbl_15_auto
+      _249_ = tbl_15_auto
     end
-    return (0 ~= #_248_)
+    return (0 ~= #_249_)
   end
   local function strip_comments(t)
     local tbl_15_auto = {}
@@ -8145,19 +8150,19 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
       indent = (start_indent + #callee)
     end
     local second
-    local function _262_()
-      local t_263_ = syntax
-      if (nil ~= t_263_) then
-        t_263_ = (t_263_)[callee]
+    local function _263_()
+      local t_264_ = syntax
+      if (nil ~= t_264_) then
+        t_264_ = (t_264_)[callee]
       else
       end
-      if (nil ~= t_263_) then
-        t_263_ = (t_263_)["binding-form?"]
+      if (nil ~= t_264_) then
+        t_264_ = (t_264_)["binding-form?"]
       else
       end
-      return t_263_
+      return t_264_
     end
-    if (_262_() and ("unquote" ~= tostring(t[2][1]))) then
+    if (_263_() and ("unquote" ~= tostring(t[2][1]))) then
       second = view_binding(t[2], view, inspector, (indent + 1), ("let" == callee), "[", "]")
     else
       second = view(t[2], inspector, indent)
@@ -8240,14 +8245,14 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
     return table.insert(out, (" " .. view_binding({select(2, unpack(t))}, view, inspector, indent, true, "", "")))
   end
   local function if_pair(view, a, b, c)
-    local function _274_()
+    local function _275_()
       if fennel["comment?"](c) then
         return (" " .. view(c))
       else
         return ""
       end
     end
-    return (view(a) .. " " .. view(b) .. _274_())
+    return (view(a) .. " " .. view(b) .. _275_())
   end
   local function pairwise_if_3f(t, indent, i, view)
     if (#strip_comments(t) < 5) then
@@ -8259,21 +8264,21 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
     elseif (80 < (indent + 1 + #if_pair(view, select(i, unpack(t))))) then
       return false
     else
-      local _275_
+      local _276_
       if fennel.comment(t[(i + 2)]) then
-        _275_ = (i + 3)
+        _276_ = (i + 3)
       else
-        _275_ = (i + 2)
+        _276_ = (i + 2)
       end
-      return pairwise_if_3f(t, indent, _275_, view)
+      return pairwise_if_3f(t, indent, _276_, view)
     end
   end
-  local function originally_different_lines_3f(_278_, line)
-    local _arg_279_ = _278_
-    local _ = _arg_279_[1]
-    local first = _arg_279_[2]
-    local second = _arg_279_[3]
-    return (("table" == type(first)) and ("table" == type(second)) and (function(_280_,_281_,_282_) return (_280_ ~= _281_) or (_281_ ~= _282_) end)(line,(first.line or line),(second.line or line)))
+  local function originally_different_lines_3f(_279_, line)
+    local _arg_280_ = _279_
+    local _ = _arg_280_[1]
+    local first = _arg_280_[2]
+    local second = _arg_280_[3]
+    return (("table" == type(first)) and ("table" == type(second)) and (function(_281_,_282_,_283_) return (_281_ ~= _282_) or (_282_ ~= _283_) end)(line,(first.line or line),(second.line or line)))
   end
   local function view_maybe_body(t, view, inspector, indent, start_indent, out, callee)
     if pairwise_if_3f(t, indent, 2, view) then
@@ -8305,38 +8310,38 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
       local callee0 = (renames[callee] or callee)
       local out = {"(", callee0}
       local indent
-      local _286_
+      local _287_
       do
-        local t_285_ = syntax
-        if (nil ~= t_285_) then
-          t_285_ = (t_285_)[callee0]
+        local t_286_ = syntax
+        if (nil ~= t_286_) then
+          t_286_ = (t_286_)[callee0]
         else
         end
-        if (nil ~= t_285_) then
-          t_285_ = (t_285_)["body-form?"]
+        if (nil ~= t_286_) then
+          t_286_ = (t_286_)["body-form?"]
         else
         end
-        _286_ = t_285_
+        _287_ = t_286_
       end
-      if _286_ then
+      if _287_ then
         indent = (start_indent + 2)
       else
         indent = (start_indent + #callee0 + 2)
       end
-      local _291_
+      local _292_
       do
-        local t_290_ = syntax
-        if (nil ~= t_290_) then
-          t_290_ = (t_290_)[callee0]
+        local t_291_ = syntax
+        if (nil ~= t_291_) then
+          t_291_ = (t_291_)[callee0]
         else
         end
-        if (nil ~= t_290_) then
-          t_290_ = (t_290_)["body-form?"]
+        if (nil ~= t_291_) then
+          t_291_ = (t_291_)["body-form?"]
         else
         end
-        _291_ = t_290_
+        _292_ = t_291_
       end
-      if _291_ then
+      if _292_ then
         view_body(t, view, inspector, indent, out, callee0)
       elseif maybe_body[callee0] then
         view_maybe_body(t, view, inspector, indent, start_indent, out, callee0)
@@ -8349,21 +8354,21 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
     end
   end
   local slength
-  local function _296_(...)
-    local _297_ = rawget(_G, "utf8")
-    if (nil ~= _297_) then
-      return (_297_).len
+  local function _297_(...)
+    local _298_ = rawget(_G, "utf8")
+    if (nil ~= _298_) then
+      return (_298_).len
     else
-      return _297_
+      return _298_
     end
   end
-  local function _299_(_241)
+  local function _300_(_241)
     return #_241
   end
-  slength = (_296_(...) or _299_)
+  slength = (_297_(...) or _300_)
   local function maybe_attach_comment(x, indent, cs)
     if (cs and (0 < #cs)) then
-      local _300_
+      local _301_
       do
         local tbl_15_auto = {}
         local i_16_auto = #tbl_15_auto
@@ -8375,9 +8380,9 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
           else
           end
         end
-        _300_ = tbl_15_auto
+        _301_ = tbl_15_auto
       end
-      return (table.concat(_300_, ("\n" .. string.rep(" ", indent))) .. ("\n" .. string.rep(" ", indent)) .. x)
+      return (table.concat(_301_, ("\n" .. string.rep(" ", indent))) .. ("\n" .. string.rep(" ", indent)) .. x)
     else
       return x
     end
@@ -8394,39 +8399,39 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
       k = view(key, inspector, (indent + 1), true)
     end
     local v = view(val, inspector, (indent + slength(k) + 1))
-    local function _305_()
-      local t_304_ = mt
-      if (nil ~= t_304_) then
-        t_304_ = (t_304_).comments
+    local function _306_()
+      local t_305_ = mt
+      if (nil ~= t_305_) then
+        t_305_ = (t_305_).comments
       else
       end
-      if (nil ~= t_304_) then
-        t_304_ = (t_304_).keys
+      if (nil ~= t_305_) then
+        t_305_ = (t_305_).keys
       else
       end
-      if (nil ~= t_304_) then
-        t_304_ = (t_304_)[key]
+      if (nil ~= t_305_) then
+        t_305_ = (t_305_)[key]
       else
       end
-      return t_304_
+      return t_305_
     end
-    local function _310_()
-      local t_309_ = mt
-      if (nil ~= t_309_) then
-        t_309_ = (t_309_).comments
+    local function _311_()
+      local t_310_ = mt
+      if (nil ~= t_310_) then
+        t_310_ = (t_310_).comments
       else
       end
-      if (nil ~= t_309_) then
-        t_309_ = (t_309_).values
+      if (nil ~= t_310_) then
+        t_310_ = (t_310_).values
       else
       end
-      if (nil ~= t_309_) then
-        t_309_ = (t_309_)[val]
+      if (nil ~= t_310_) then
+        t_310_ = (t_310_)[val]
       else
       end
-      return t_309_
+      return t_310_
     end
-    return (maybe_attach_comment(k, indent, _305_()) .. " " .. maybe_attach_comment(v, indent, _310_()))
+    return (maybe_attach_comment(k, indent, _306_()) .. " " .. maybe_attach_comment(v, indent, _311_()))
   end
   local function view_multiline_kv(pair_strs, indent, last_comments)
     if (last_comments and (0 < #last_comments)) then
@@ -8450,8 +8455,8 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
     local indent0 = (indent + 1)
     local mt = getmetatable(t)
     local keys
-    local function _316_()
-      local _317_
+    local function _317_()
+      local _318_
       do
         local tbl_15_auto = {}
         local i_16_auto = #tbl_15_auto
@@ -8463,12 +8468,12 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
           else
           end
         end
-        _317_ = tbl_15_auto
+        _318_ = tbl_15_auto
       end
-      table.sort(_317_, sorter)
-      return _317_
+      table.sort(_318_, sorter)
+      return _318_
     end
-    keys = (mt.keys or _316_())
+    keys = (mt.keys or _317_())
     local pair_strs
     do
       local tbl_15_auto = {}
@@ -8484,36 +8489,36 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
       pair_strs = tbl_15_auto
     end
     local oneline = ("{" .. table.concat(pair_strs, " ") .. "}")
-    local function _320_()
-      local t_321_ = mt
-      if (nil ~= t_321_) then
-        t_321_ = (t_321_).comments
+    local function _321_()
+      local t_322_ = mt
+      if (nil ~= t_322_) then
+        t_322_ = (t_322_).comments
       else
       end
-      if (nil ~= t_321_) then
-        t_321_ = (t_321_).last
+      if (nil ~= t_322_) then
+        t_322_ = (t_322_).last
       else
       end
-      if (nil ~= t_321_) then
-        t_321_ = (t_321_)[1]
+      if (nil ~= t_322_) then
+        t_322_ = (t_322_)[1]
       else
       end
-      return t_321_
+      return t_322_
     end
-    if (oneline:match("\n") or _320_() or ((indent0 + #oneline) > inspector["line-length"])) then
-      local function _326_()
-        local t_325_ = mt
-        if (nil ~= t_325_) then
-          t_325_ = (t_325_).comments
+    if (oneline:match("\n") or _321_() or ((indent0 + #oneline) > inspector["line-length"])) then
+      local function _327_()
+        local t_326_ = mt
+        if (nil ~= t_326_) then
+          t_326_ = (t_326_).comments
         else
         end
-        if (nil ~= t_325_) then
-          t_325_ = (t_325_).last
+        if (nil ~= t_326_) then
+          t_326_ = (t_326_).last
         else
         end
-        return t_325_
+        return t_326_
       end
-      return view_multiline_kv(pair_strs, indent0, _326_())
+      return view_multiline_kv(pair_strs, indent0, _327_())
     else
       return oneline
     end
@@ -8535,12 +8540,12 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
   local function set_fennelview_metamethod(idx, form, parent)
     if (("table" == type(form)) and not fennel["sym?"](form) and not fennel["comment?"](form) and not fennel["varg?"](form)) then
       if (not fennel["list?"](form) and not fennel["sequence?"](form)) then
-        local _331_ = getmetatable(form)
-        if (nil ~= _331_) then
-          local mt = _331_
+        local _332_ = getmetatable(form)
+        if (nil ~= _332_) then
+          local mt = _332_
           mt["__fennelview"] = view_kv
         elseif true then
-          local _ = _331_
+          local _ = _332_
           setmetatable(form, {__fennelview = view_kv})
         else
         end
@@ -8555,9 +8560,9 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
     return (s:find("^[-%w?^_!$%&*+./|<=>]+$") and not s:find("^[-?^_!$%&*+./@|<=>%\\]+$"))
   end
   local function fnlfmt(ast)
-    local _let_335_ = getmetatable(fennel.list())
-    local list_mt = _let_335_
-    local __fennelview = _let_335_["__fennelview"]
+    local _let_336_ = getmetatable(fennel.list())
+    local list_mt = _let_336_
+    local __fennelview = _let_336_["__fennelview"]
     local _
     list_mt.__fennelview = view_list
     _ = nil
@@ -8570,16 +8575,16 @@ package.preload["fnlfmt"] = package.preload["fnlfmt"] or function(...)
   local function space_out_forms_3f(prev_ast, ast)
     return not (prev_ast.line and ast.line and (1 == (ast.line - prev_ast.line)))
   end
-  local function format_file(filename, _336_)
-    local _arg_337_ = _336_
-    local no_comments = _arg_337_["no-comments"]
+  local function format_file(filename, _337_)
+    local _arg_338_ = _337_
+    local no_comments = _arg_338_["no-comments"]
     local f
     do
-      local _338_ = filename
-      if (_338_ == "-") then
+      local _339_ = filename
+      if (_339_ == "-") then
         f = io.stdin
       elseif true then
-        local _ = _338_
+        local _ = _339_
         f = assert(io.open(filename, "r"), "File not found.")
       else
         f = nil
@@ -8657,12 +8662,12 @@ if ((debug and debug.getinfo) and (debug.getinfo(3) == nil)) then
     return os.exit(1)
   end
 else
-  local function _345_(str, source)
+  local function _346_(str, source)
     local out = {}
     for _, code in ipairs(compile(reader.string(str), (source or "*source"))) do
       table.insert(out, fnlfmt.fnlfmt(code))
     end
     return table.concat(out, "\n")
   end
-  return _345_
+  return _346_
 end
