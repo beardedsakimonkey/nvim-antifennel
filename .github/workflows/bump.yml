@@ -1,8 +1,7 @@
 name: Bump
 on:
   schedule:
-    # Run this every hour
-    - cron: "0 * * * *"
+    - cron: "0 0 * * *" # every day at midnight
 
 jobs:
   bump-antifennel:
