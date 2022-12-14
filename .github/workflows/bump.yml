@@ -1,0 +1,29 @@
+name: Bump
+on:
+  workflow_call:
+  schedule:
+    # Run this every hour
+    - cron: "0 * * * *"
+
+jobs:
+  bump-antifennel:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install luajit
+        run: |
+          sudo apt-get -y install luajit
+      - name: Clone and build antifennel
+        run: |
+          mkdir ./tmp
+          git clone --depth=1 https://git.sr.ht/~technomancy/antifennel ./tmp/antifennel
+          cd ./tmp/antifennel
+          make
+      - name: Copy artifact
+        run: |
+          cp ./tmp/antifennel/antifennel ./vendor/antifennel
+          rm -rf ./tmp
+      - name: Push changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "bump antifennel"
